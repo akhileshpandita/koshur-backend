@@ -93,5 +93,10 @@ def compare_audio():
 
     return jsonify({"score": score, "feedback": feedback})
 
+# Add this new default route for testing
+@app.route("/")
+def index():
+    return "KOSHUR Backend is running."
+
 if __name__ == "__main__":
     app.run(debug=True)
