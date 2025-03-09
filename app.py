@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
 
 # Initialize Resemblyzer model
-encoder = VoiceEncoder()
+encoder = VoiceEncoder(use_f16=True)  # ✅ Uses half-precision floats (less memory)
 
 # DSAL audio links keyed by word
 dsal_audio_links = {
