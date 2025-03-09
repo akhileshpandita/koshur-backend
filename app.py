@@ -66,8 +66,13 @@ def compare_audio():
 
     audio_file = request.files["audio"]
 
-    # Save uploaded audio temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+    # Determine the file extension from the uploaded file's name
+    _, ext = os.path.splitext(audio_file.filename)
+    if not ext:
+        ext = ".webm"  # Fallback to .webm if no extension is found
+
+    # Save uploaded audio temporarily with the correct extension
+    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
         audio_file.save(tmp)
         user_audio_path = tmp.name
 
@@ -93,7 +98,7 @@ def compare_audio():
 
     return jsonify({"score": score, "feedback": feedback})
 
-# Add this new default route for testing
+# Default route for testing
 @app.route("/")
 def index():
     return "KOSHUR Backend is running."
