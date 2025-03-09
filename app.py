@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 from resemblyzer import VoiceEncoder, preprocess_wav
+import librosa  # Add this import at the top if it's missin
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
@@ -48,13 +49,24 @@ def get_dsal_audio(word):
             return None
     return dsal_path
 
+def load_audio_optimized(audio_path):
+    """
+    Load only the first 5 seconds of audio to reduce memory usage.
+    """
+    wav, sr = librosa.load(audio_path, sr=16000, mono=True, duration=5)
+    return wav
+
+
 def compute_audio_similarity(user_audio_path, dsal_audio_path):
-    user_wav = preprocess_wav(user_audio_path)
-    dsal_wav = preprocess_wav(dsal_audio_path)
+    user_wav = load_audio_optimized(user_audio_path)  # ✅ Load only 5 seconds
+    dsal_wav = load_audio_optimized(dsal_audio_path)  # ✅ Load only 5 seconds
+
     user_embed = encoder.embed_utterance(user_wav)
     dsal_embed = encoder.embed_utterance(dsal_wav)
+
     similarity = np.dot(user_embed, dsal_embed) / (np.linalg.norm(user_embed) * np.linalg.norm(dsal_embed))
     return round(similarity * 100, 2)
+
 
 @app.route("/compare_audio", methods=["POST"])
 def compare_audio():
