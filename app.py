@@ -7,6 +7,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 from resemblyzer import VoiceEncoder, preprocess_wav
+port = int(os.environ.get("PORT", 10000))  # Use the correct PORT from environment
+app.run(host="0.0.0.0", port=port)
+
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
