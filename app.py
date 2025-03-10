@@ -2,17 +2,18 @@ import os
 import tempfile
 import requests
 import torch
-import librosa  # Add this import at the top if it's missin
+import librosa  
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 from resemblyzer import VoiceEncoder, preprocess_wav
-port = int(os.environ.get("PORT", 10000))  # Use the correct PORT from environment
-app.run(host="0.0.0.0", port=port)
 
-
+# Define Flask app **before running it**
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
+
+# Use the correct PORT from environment
+port = int(os.environ.get("PORT", 10000))
 
 # Initialize Resemblyzer model
 encoder = VoiceEncoder()  # ✅ Uses half-precision floats (less memory)
@@ -66,11 +67,8 @@ def compute_audio_similarity(user_audio_path, dsal_audio_path):
     dsal_wav = load_audio_optimized(dsal_audio_path)
 
     # ✅ Convert embeddings to lower precision manually
-    #user_embed = torch.tensor(encoder.embed_utterance(user_wav)).half().numpy()
-    #dsal_embed = torch.tensor(encoder.embed_utterance(dsal_wav)).half().numpy()
     user_embed = encoder.embed_utterance(user_wav).astype(np.float16)
     dsal_embed = encoder.embed_utterance(dsal_wav).astype(np.float16)
-
 
     similarity = np.dot(user_embed, dsal_embed) / (np.linalg.norm(user_embed) * np.linalg.norm(dsal_embed))
     return round(similarity * 100, 2)
@@ -123,5 +121,7 @@ def compare_audio():
 def index():
     return "KOSHUR Backend is running."
 
+
+# ✅ **Move `app.run()` to this section**
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
