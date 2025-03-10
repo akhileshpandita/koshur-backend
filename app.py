@@ -66,8 +66,11 @@ def compute_audio_similarity(user_audio_path, dsal_audio_path):
     dsal_wav = load_audio_optimized(dsal_audio_path)
 
     # ✅ Convert embeddings to lower precision manually
-    user_embed = torch.tensor(encoder.embed_utterance(user_wav)).half().numpy()
-    dsal_embed = torch.tensor(encoder.embed_utterance(dsal_wav)).half().numpy()
+    #user_embed = torch.tensor(encoder.embed_utterance(user_wav)).half().numpy()
+    #dsal_embed = torch.tensor(encoder.embed_utterance(dsal_wav)).half().numpy()
+    user_embed = encoder.embed_utterance(user_wav).astype(np.float16)
+    dsal_embed = encoder.embed_utterance(dsal_wav).astype(np.float16)
+
 
     similarity = np.dot(user_embed, dsal_embed) / (np.linalg.norm(user_embed) * np.linalg.norm(dsal_embed))
     return round(similarity * 100, 2)
