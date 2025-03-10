@@ -1,11 +1,12 @@
 import os
 import tempfile
 import requests
+import torch
+import librosa  # Add this import at the top if it's missin
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 from resemblyzer import VoiceEncoder, preprocess_wav
-import librosa  # Add this import at the top if it's missin
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
@@ -58,11 +59,12 @@ def load_audio_optimized(audio_path):
 
 
 def compute_audio_similarity(user_audio_path, dsal_audio_path):
-    user_wav = load_audio_optimized(user_audio_path)  # ✅ Load only 5 seconds
-    dsal_wav = load_audio_optimized(dsal_audio_path)  # ✅ Load only 5 seconds
+    user_wav = load_audio_optimized(user_audio_path)
+    dsal_wav = load_audio_optimized(dsal_audio_path)
 
-    user_embed = encoder.embed_utterance(user_wav)
-    dsal_embed = encoder.embed_utterance(dsal_wav)
+    # ✅ Convert embeddings to lower precision manually
+    user_embed = torch.tensor(encoder.embed_utterance(user_wav)).half().numpy()
+    dsal_embed = torch.tensor(encoder.embed_utterance(dsal_wav)).half().numpy()
 
     similarity = np.dot(user_embed, dsal_embed) / (np.linalg.norm(user_embed) * np.linalg.norm(dsal_embed))
     return round(similarity * 100, 2)
